@@ -1,0 +1,35 @@
+ version: "3.3"
+ 
+ services:
+    jenkins:
+        image: jenkins/jenkins
+        container_name: jenkins
+        restart: always
+        privileged: true
+        ports:
+            - "8080:8080"
+            - "5000:5000"
+        networks: 
+            - golden_gate 
+        volumes:
+            - jenkins_data:/var/jenkins_home
+            - /var/run/docker.sock:/var/run/docker.sock
+            - docker_certs:/certs/client:ro
+    socat:
+        image: alpine/socat:latest
+        container_name: alpine-socat
+        restart: always
+        command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+        networks: 
+            - golden_gate
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        expose:
+            - "2375"
+ networks:
+    golden_gate:
+        driver: bridge
+ volumes:
+    jenkins_data: {}
+    docker_certs: {}
+            
